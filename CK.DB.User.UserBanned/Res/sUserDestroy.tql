@@ -1,0 +1,9 @@
+-- SetupConfig: { }
+--
+create transformer on CK.sUserDestroy
+as
+begin
+    inject "
+        delete from CK.tUserBanned where UserId = @UserId;
+    " into "PreDestroy";
+end
