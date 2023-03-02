@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="**\*.sql" />
+    <None Remove="**\*.tql" />
+    <EmbeddedResource Include="**\*.sql" />
+    <EmbeddedResource Include="**\*.tql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CK.DB.Auth" Version="18.0.0" />
+  </ItemGroup>
+
+</Project>

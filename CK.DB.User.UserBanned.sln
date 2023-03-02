@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.DB.User.UserBanned", "CK.DB.User.UserBanned\CK.DB.User.UserBanned.csproj", "{573E0AFE-7C06-4BC4-986F-EDC2F99B2B34}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AA6AEB38-4492-4377-9F22-302412DB594B}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\TestHelper.config = Tests\TestHelper.config
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.DB.User.UserBanned.Tests", "Tests\CK.DB.User.UserBanned.Tests\CK.DB.User.UserBanned.Tests.csproj", "{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6EC3D56-5231-427C-9BAF-1F1E3F7DBD86}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		NuGet.config = NuGet.config
+		README.md = README.md
+		Common\SharedKey.snk = Common\SharedKey.snk
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{573E0AFE-7C06-4BC4-986F-EDC2F99B2B34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{573E0AFE-7C06-4BC4-986F-EDC2F99B2B34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{573E0AFE-7C06-4BC4-986F-EDC2F99B2B34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{573E0AFE-7C06-4BC4-986F-EDC2F99B2B34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{488D99BB-BAFB-4741-B4A2-52EACA2AFAD5} = {AA6AEB38-4492-4377-9F22-302412DB594B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC37E590-C4F9-4198-8BB7-E9C8947F0346}
+	EndGlobalSection
+EndGlobal
