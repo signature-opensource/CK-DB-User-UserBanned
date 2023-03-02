@@ -42,7 +42,7 @@ namespace CK.DB.User.UserBanned.Tests
             {
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, userId, "Test ban user", DateTime.UtcNow.AddYears( -1 ), new TimeSpan( 3712 ) );
+                userBanned.SetUserBanned( ctx, 1, "test", userId, DateTime.UtcNow.AddYears( -1 ), new TimeSpan( 3712 ) );
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
@@ -64,7 +64,7 @@ namespace CK.DB.User.UserBanned.Tests
             {
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, userId, "Test ban user", DateTime.UtcNow.AddYears( 1 ) );
+                userBanned.SetUserBanned( ctx, 1, "test", userId, DateTime.UtcNow.AddYears( 1 ) );
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
@@ -84,14 +84,15 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
+                string reason = Guid.NewGuid().ToString();
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, userId, "Test ban user" );
+                userBanned.SetUserBanned( ctx, 1, reason, userId );
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
                 result.FailureCode.Should().Be( 6 );
-                result.FailureReason.Should().Be( "LoginFailed.UserBanned" );
+                result.FailureReason.Should().Be( reason );
                 result.IsSuccess.Should().BeFalse();
             }
         }

@@ -1,6 +1,7 @@
 using CK.SqlServer;
 using Dapper;
 using System;
+using System.Collections.Generic;
 
 namespace CK.DB.User.UserBanned.Tests
 {
@@ -10,27 +11,37 @@ namespace CK.DB.User.UserBanned.Tests
         {
             public int UserId { get; set; }
 
-            public string UserName { get; set; } = string.Empty;
+            public string Reason { get; set; } = string.Empty;
 
             public DateTime BanStartDate { get; set; }
 
             public DateTime BanEndDate { get; set; }
-
-            public bool IsBannedNow { get; set; }
-
-            public string Reason { get; set; } = string.Empty;
         }
 
-        internal static UserBanned? GetUserBanned( this UserBannedTable @this, ISqlCallContext ctx, int userId )
+        internal static IEnumerable<UserBanned> GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
+        {
+            return ctx.GetConnectionController( @this ).Query<UserBanned>(
+                @"select UserId, Reason, BanStartDate, BanEndDate
+                  from CK.vUserCurrentlyBanned
+                  where UserId = @UserId;",
+                new { UserId = userId } );
+        }
+
+        internal static UserBanned? GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId, string reason )
         {
             return ctx.GetConnectionController( @this ).QuerySingleOrDefault<UserBanned?>(
-                @"select UserId
-                        ,UserName
-                        ,BanStartDate
-                        ,BanEndDate
-                        ,IsBannedNow
-                        ,Reason
-                  from CK.vUserBanned
+                @"select UserId, Reason, BanStartDate, BanEndDate
+                  from CK.vUserCurrentlyBanned
+                  where UserId = @UserId
+                      and Reason like @Reason;",
+                new { UserId = userId, Reason = reason } );
+        }
+
+        internal static UserBanned? GetBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId, string reason )
+        {
+            return ctx.GetConnectionController( @this ).QuerySingleOrDefault<UserBanned?>(
+                @"select UserId, Reason, BanStartDate, BanEndDate
+                  from CK.tUserBanned
                   where UserId = @UserId;",
                 new { UserId = userId } );
         }

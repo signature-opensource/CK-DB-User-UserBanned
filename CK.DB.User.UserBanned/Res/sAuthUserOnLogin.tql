@@ -3,12 +3,18 @@ create transformer on CK.sAuthUserOnLogin
 as
 begin
     inject "
-    -- Check if user is banned now
-    declare @IsBannedNow int = (select IsBannedNow from CK.vUserBanned where UserId = @UserId);
-    if (@IsBannedNow is not null and @IsBannedNow > 0)
+    -- Check if user is currently banned
+
+    declare @BanReason varchar(128);
+    select @BanReason = Reason
+    from CK.vUserCurrentlyBanned
+    where UserId = @UserId;
+
+    if @BanReason is not null
     begin
+        set @FailureReason = convert(nvarchar(255), @BanReason);
+        -- CK.DB.Auth.KnownLoginFailureCode -> GloballyDisabledUser
         set @FailureCode = 6;
-        set @FailureReason = N'LoginFailed.UserBanned';
     end
 " after single "--<CheckLoginFailure />"
 end
