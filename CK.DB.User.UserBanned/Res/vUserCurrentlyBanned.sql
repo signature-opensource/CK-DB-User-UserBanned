@@ -3,7 +3,7 @@
 create view CK.vUserCurrentlyBanned
 as
     select ub.UserId
-    	  ,ub.Reason
+    	  ,ub.KeyReason
           ,u.UserName
     	  ,ub.BanStartDate
     	  ,ub.BanEndDate

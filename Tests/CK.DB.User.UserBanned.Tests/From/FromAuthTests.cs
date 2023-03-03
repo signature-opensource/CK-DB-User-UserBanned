@@ -84,15 +84,15 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = Guid.NewGuid().ToString();
+                string keyReason = Guid.NewGuid().ToString();
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
                 result.FailureCode.Should().Be( 6 );
-                result.FailureReason.Should().Be( reason );
+                result.FailureReason.Should().Be( keyReason );
                 result.IsSuccess.Should().BeFalse();
             }
         }

@@ -6,7 +6,7 @@ begin
     -- Check if user is currently banned
 
     declare @BanReason varchar(128);
-    select @BanReason = Reason
+    select @BanReason = KeyReason
     from CK.vUserCurrentlyBanned
     where UserId = @UserId;
 

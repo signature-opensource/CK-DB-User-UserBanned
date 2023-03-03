@@ -22,22 +22,22 @@ A user banishment can be set and destroy thanks to the `UserBannedTable` methods
 /// </summary>
 /// <param name="ctx">The call context.</param>
 /// <param name="actorId">The identifier of the actor who bans the user.</param>
-/// <param name="reason">The reason of the banishment.</param>
+/// <param name="keyReason">The reason of the banishment.</param>
 /// <param name="userId">The identifier of the user to ban.</param>
 /// <param name="banStartDate">The start date of the banishment, default is utc now.</param>
 /// <param name="banEndDate">The end date of the banishment, default is eternal.</param>
 [SqlProcedure( "sUserBannedSet" )]
-public abstract void SetUserBanned( ISqlCallContext ctx, int actorId, string reason, int userId, DateTime? banStartDate = null, DateTime? banEndDate = null );
+public abstract void SetUserBanned( ISqlCallContext ctx, int actorId, string keyReason, int userId, DateTime? banStartDate = null, DateTime? banEndDate = null );
 
 /// <summary>
 /// Destroys the user banishment.
 /// </summary>
 /// <param name="ctx">The call context.</param>
 /// <param name="actorId">The identifier of the actor who destroy the banishment.</param>
-/// <param name="reason">The reason of the banishment.</param>
+/// <param name="keyReason">The reason of the banishment.</param>
 /// <param name="userId">The identifier of the user to unbanned.</param>
 [SqlProcedure( "sUserBannedDestroy" )]
-public abstract void DestroyUserBanned( ISqlCallContext ctx, int actorId, string reason, int userId );
+public abstract void DestroyUserBanned( ISqlCallContext ctx, int actorId, string keyReason, int userId );
 ```
 
 This `CK.DB.User.UserBanned.Package` injects code into `CK.sAuthUserOnLogin` procedure (from the CK.DB.Auth package). To check the user is not currently banned.
@@ -46,6 +46,6 @@ The sql function `CK.fUserBannedAt` returns the effective banishments of the CK.
 
 The sql view `CK.vUserCurrentlyBanned` is based on the previous function and returns the following values for the banned users at the execution:
 ```sql
-select UserId, Reason, UserName, BanStartDate, BanEndDate
+select UserId, KeyReason, UserName, BanStartDate, BanEndDate
 from CK.vUserCurrentlyBanned;
 ```

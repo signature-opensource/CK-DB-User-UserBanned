@@ -38,7 +38,7 @@ namespace CK.DB.User.UserBanned.Tests
         }
 
         [Test]
-        public void null_ro_empty_reason_is_invalid()
+        public void null_ro_empty_keyReason_is_invalid()
         {
             var userBanned = ObtainSqlPackage<UserBannedTable>();
 
@@ -47,12 +47,12 @@ namespace CK.DB.User.UserBanned.Tests
                 userBanned.Invoking( table => table.SetUserBanned( ctx, 1, null!, 3712 ) )
                     .Should().Throw<Exception>()
                     .WithInnerException<Exception>()
-                    .WithMessage( "Security.InvalidNullOrEmptyReason" );
+                    .WithMessage( "Security.InvalidNullOrEmptyKeyReason" );
 
                 userBanned.Invoking( table => table.SetUserBanned( ctx, 1, "", 3712 ) )
                     .Should().Throw<Exception>()
                     .WithInnerException<Exception>()
-                    .WithMessage( "Security.InvalidNullOrEmptyReason" );
+                    .WithMessage( "Security.InvalidNullOrEmptyKeyReason" );
             }
         }
 
@@ -99,16 +99,16 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = "test";
+                string keyReason = "test";
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, reason ).Should().NotBeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ).Should().NotBeNull();
 
-                userBanned.DestroyUserBanned( ctx, 1, reason, userId );
+                userBanned.DestroyUserBanned( ctx, 1, keyReason, userId );
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, reason ).Should().BeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ).Should().BeNull();
             }
         }
 
@@ -191,18 +191,18 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = "test";
+                string keyReason = "test";
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
                 Assert.IsNotNull(
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, reason ),
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ),
                     $"Banned user {userId} must be in the UserBanned table." );
 
                 user.DestroyUser( ctx, 1, userId );
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, reason ).Should().BeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ).Should().BeNull();
             }
         }
 
@@ -214,22 +214,22 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = "repeat-user-ban";
+                string keyReason = "repeat-user-ban";
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
                 Assert.IsNull(
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, reason ),
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ),
                     $"User {userId} must not be banned." );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
-                var banned = userBanned.GetCurrentlyBannedUser( ctx, userId, reason );
+                var banned = userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason );
 
                 for( int i = 0; i < 10; i++ )
                 {
-                    userBanned.SetUserBanned( ctx, 1, reason, userId );
+                    userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
-                    var banned2 = userBanned.GetCurrentlyBannedUser( ctx, userId, reason );
+                    var banned2 = userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason );
 
                     banned2.Should().NotBeNull();
 
@@ -256,7 +256,7 @@ namespace CK.DB.User.UserBanned.Tests
 
                 userBanned.SetUserBanned( ctx, 1, "test", userId, DateTime.UtcNow.AddYears( 3712 ) );
 
-                userBanned.GetBannedUser( ctx, userId, "test" ).Should().NotBeNull();
+                userBanned.GetBannedUser( ctx, userId ).Should().NotBeNull();
 
                 userBanned.GetCurrentlyBannedUser( ctx, userId, "test" ).Should().BeNull();
             }
@@ -270,14 +270,14 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = "futur-ban";
+                string keyReason = "futur-ban";
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId, DateTime.UtcNow.AddYears( -1 ), new TimeSpan( 3712L ) );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId, DateTime.UtcNow.AddYears( -1 ), new TimeSpan( 3712L ) );
 
-                userBanned.GetBannedUser( ctx, userId, reason ).Should().NotBeNull();
+                userBanned.GetBannedUser( ctx, userId ).Should().NotBeNull();
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, reason ).Should().BeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ).Should().BeNull();
             }
         }
 
@@ -289,12 +289,12 @@ namespace CK.DB.User.UserBanned.Tests
 
             using( SqlStandardCallContext ctx = new() )
             {
-                string reason = "ban-forever";
+                string keyReason = "ban-forever";
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, reason ).Should().NotBeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason ).Should().NotBeNull();
             }
         }
 
@@ -310,28 +310,28 @@ namespace CK.DB.User.UserBanned.Tests
 
                 DateTime banStartDate = DateTime.UtcNow;
                 TimeSpan duration = TimeSpan.FromDays( 1 );
-                string reason = "test";
+                string keyReason = "test";
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId, banStartDate, duration );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId, banStartDate, duration );
 
-                var banned = userBanned.GetCurrentlyBannedUser( ctx, userId, reason );
+                var banned = userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason );
                 banned.Should().NotBeNull();
                 banned!.UserId.Should().Be( userId );
                 banned!.BanStartDate.Should().BeCloseTo( banStartDate, new TimeSpan( 0, 0, 0, 0, 10 ) );
                 banned!.BanEndDate.Should().BeCloseTo( banStartDate + duration, new TimeSpan( 0, 0, 0, 0, 10 ) );
-                banned!.Reason.Should().Be( reason );
+                banned!.KeyReason.Should().Be( keyReason );
 
                 banStartDate = DateTime.UtcNow.AddDays( -1 );
                 duration = TimeSpan.FromDays( 10 );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId, banStartDate, duration );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId, banStartDate, duration );
 
-                banned = userBanned.GetCurrentlyBannedUser( ctx, userId, reason );
+                banned = userBanned.GetCurrentlyBannedUser( ctx, userId, keyReason );
                 banned.Should().NotBeNull();
                 banned!.UserId.Should().Be( userId );
                 banned!.BanStartDate.Should().BeCloseTo( banStartDate, new TimeSpan( 0, 0, 0, 0, 10 ) );
                 banned!.BanEndDate.Should().BeCloseTo( banStartDate + duration, new TimeSpan( 0, 0, 0, 0, 10 ) );
-                banned!.Reason.Should().Be( reason );
+                banned!.KeyReason.Should().Be( keyReason );
             }
         }
 
@@ -344,21 +344,21 @@ namespace CK.DB.User.UserBanned.Tests
             using( SqlStandardCallContext ctx = new() )
             {
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
-                string reason = "test";
+                string keyReason = "test";
                 var firstBanStartDate = new DateTime( 3712, 01, 01 );
                 var firstBanEndDate = firstBanStartDate.AddDays( 1 );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId, firstBanStartDate, firstBanEndDate );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId, firstBanStartDate, firstBanEndDate );
 
-                var banned = userBanned.GetBannedUser( ctx, userId, reason );
+                var banned = userBanned.GetBannedUser( ctx, userId );
 
                 banned.Should().NotBeNull();
                 banned!.BanStartDate.Should().Be( firstBanStartDate );
                 banned!.BanEndDate.Should().Be( firstBanEndDate );
 
-                userBanned.SetUserBanned( ctx, 1, reason, userId );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId );
 
-                banned = userBanned.GetBannedUser( ctx, userId, reason );
+                banned = userBanned.GetBannedUser( ctx, userId );
                 banned.Should().NotBeNull();
                 banned!.BanStartDate.Should().Be( firstBanStartDate );
                 banned!.BanEndDate.Should().Be( new DateTime( 9999, 12, 31 ) );
@@ -375,19 +375,19 @@ namespace CK.DB.User.UserBanned.Tests
             {
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                string reason1 = "first-reason";
-                userBanned.SetUserBanned( ctx, 1, reason1, userId );
-                string reason2 = "second-reason";
-                userBanned.SetUserBanned( ctx, 1, reason2, userId );
-                string reason3 = "tird-reason";
-                userBanned.SetUserBanned( ctx, 1, reason3, userId );
+                string keyReason1 = "first-reason";
+                userBanned.SetUserBanned( ctx, 1, keyReason1, userId );
+                string keyReason2 = "second-reason";
+                userBanned.SetUserBanned( ctx, 1, keyReason2, userId );
+                string keyReason3 = "tird-reason";
+                userBanned.SetUserBanned( ctx, 1, keyReason3, userId );
 
                 var banns = userBanned.GetCurrentlyBannedUser( ctx, userId );
 
                 banns.Should().HaveCount( 3 );
-                banns.Should().ContainSingle( ban => ban.Reason == reason1 );
-                banns.Should().ContainSingle( ban => ban.Reason == reason2 );
-                banns.Should().ContainSingle( ban => ban.Reason == reason3 );
+                banns.Should().ContainSingle( ban => ban.KeyReason == keyReason1 );
+                banns.Should().ContainSingle( ban => ban.KeyReason == keyReason2 );
+                banns.Should().ContainSingle( ban => ban.KeyReason == keyReason3 );
             }
         }
 
