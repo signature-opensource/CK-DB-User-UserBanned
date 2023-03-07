@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace CK.DB.User.UserBanned.Tests
 {
-    internal static class UserBannedTableExtensions
+    public static class UserBannedTableExtensions
     {
-        internal sealed class UserBanned
+        public sealed class UserBanned
         {
             public int UserId { get; set; }
 
@@ -18,7 +18,7 @@ namespace CK.DB.User.UserBanned.Tests
             public DateTime BanEndDate { get; set; }
         }
 
-        internal static IEnumerable<UserBanned> GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
+        public static IEnumerable<UserBanned> GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
         {
             return ctx.GetConnectionController( @this ).Query<UserBanned>(
                 @"select UserId, KeyReason, BanStartDate, BanEndDate
@@ -27,7 +27,7 @@ namespace CK.DB.User.UserBanned.Tests
                 new { UserId = userId } );
         }
 
-        internal static UserBanned? GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId, string keyReason )
+        public static UserBanned? GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId, string keyReason )
         {
             return ctx.GetConnectionController( @this ).QuerySingleOrDefault<UserBanned?>(
                 @"select UserId, KeyReason, BanStartDate, BanEndDate
@@ -37,7 +37,7 @@ namespace CK.DB.User.UserBanned.Tests
                 new { UserId = userId, KeyReason = keyReason } );
         }
 
-        internal static UserBanned? GetBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
+        public static UserBanned? GetBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
         {
             return ctx.GetConnectionController( @this ).QuerySingleOrDefault<UserBanned?>(
                 @"select UserId, KeyReason, BanStartDate, BanEndDate

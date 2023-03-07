@@ -1,0 +1,27 @@
+create transformer on CK.sAuthUserOnLogin
+as
+begin
+    inject "
+                if @FailedAttemptCount > 3
+                begin
+                	declare @Now datetime2(2) = sysutcdatetime();
+                	declare @EndBanned datetime2(2);
+
+                	if @FailedAttemptCount > 8
+                	begin
+                		set @EndBanned = dateadd(hour, 24, @Now);
+                	end
+                	else if @FailedAttemptCount > 5
+                	begin
+                		set @EndBanned = dateadd(hour, 2, @Now);
+                	end
+                	else
+                	begin
+                		set @EndBanned = dateadd(minute, 15, @Now);
+                	end
+
+                	exec CK.sUserBannedSet 1, 'UserPassword.TooManyAttempt', @UserId, @Now, @EndBanned;
+                end
+
+" into "OnBasicAttemptCountIncremented"
+end
