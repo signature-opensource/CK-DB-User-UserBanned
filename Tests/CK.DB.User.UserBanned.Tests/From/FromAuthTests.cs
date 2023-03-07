@@ -97,6 +97,45 @@ namespace CK.DB.User.UserBanned.Tests
             }
         }
 
+        [Test]
+        public void can_login_after_ban_duration()
+        {
+            // Reduce a pricision of a DateTime to 0,01 second, because the sql ban date works with datetim2(2).
+            static DateTime ReducePrecision( DateTime dateTime )
+                => new DateTime( dateTime.Ticks - (dateTime.Ticks % (TimeSpan.TicksPerMillisecond * 10)), dateTime.Kind );
+
+            var user = ObtainSqlPackage<UserTable>();
+            var userBanned = ObtainSqlPackage<UserBannedTable>();
+            var auth = ObtainSqlPackage<CK.DB.Auth.Package>();
+
+            using( SqlStandardCallContext ctx = new() )
+            {
+                string keyReason = Guid.NewGuid().ToString();
+                int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
+
+                var banStartDate = ReducePrecision( DateTime.UtcNow );
+                var banEndDate = ReducePrecision( banStartDate.AddSeconds( 5 ) );
+                userBanned.SetUserBanned( ctx, 1, keyReason, userId, banStartDate, banEndDate );
+
+                DateTime now;
+                LoginResult result;
+
+                while( (now = ReducePrecision( DateTime.UtcNow )) < banEndDate )
+                {
+                    result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, now );
+
+                    result.FailureCode.Should().Be( 6 );
+                    result.FailureReason.Should().Be( keyReason );
+                    result.IsSuccess.Should().BeFalse();
+                }
+
+                result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
+
+                result.FailureCode.Should().Be( 0 );
+                result.IsSuccess.Should().BeTrue();
+            }
+        }
+
         static T ObtainSqlPackage<T>() where T : SqlPackage
         {
             return TestHelper.StObjMap.StObjs.Obtain<T>()
