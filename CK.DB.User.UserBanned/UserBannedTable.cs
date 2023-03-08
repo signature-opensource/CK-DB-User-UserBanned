@@ -7,7 +7,7 @@ namespace CK.DB.User.UserBanned
 {
     [SqlTable( "tUserBanned", Package = typeof( Package ), ResourcePath = "Res" )]
     [Versions( "1.0.0" )]
-    [SqlObjectItem( "fUserBannedAt" )]
+    [SqlObjectItem( "fUserBannedViewAt" )]
     [SqlObjectItem( "vUserCurrentlyBanned" )]
     public abstract class UserBannedTable : SqlTable
     {

@@ -1,4 +1,4 @@
-create function CK.fUserBannedAt
+create function CK.fUserBannedViewAt
 (
     @Date datetime2(2)
 )
@@ -6,7 +6,7 @@ returns table
 as
 return
 (
-    select *
+    select UserId, KeyReason, BanStartDate, BanEndDate
     from CK.tUserBanned
     where BanStartDate <= @Date and @Date < BanEndDate
 );

@@ -42,7 +42,7 @@ public abstract void DestroyUserBanned( ISqlCallContext ctx, int actorId, string
 
 This `CK.DB.User.UserBanned.Package` injects code into `CK.sAuthUserOnLogin` procedure (from the CK.DB.Auth package). To check the user is not currently banned.
 
-The sql function `CK.fUserBannedAt` returns the effective banishments of the CK.tUserBanned table on the selected date.
+The sql function `CK.fUserBannedViewAt` returns the effective banishments of the CK.tUserBanned table on the selected date.
 
 The sql view `CK.vUserCurrentlyBanned` is based on the previous function and returns the following values for the banned users at the execution:
 ```sql

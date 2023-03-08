@@ -7,6 +7,6 @@ as
           ,u.UserName
     	  ,ub.BanStartDate
     	  ,ub.BanEndDate
-    from CK.fUserBannedAt( convert(datetime2(2), sysutcdatetime()) ) ub
+    from CK.fUserBannedViewAt( convert(datetime2(2), sysutcdatetime()) ) ub
     inner join CK.tUser u
     	on ub.UserId = u.UserId

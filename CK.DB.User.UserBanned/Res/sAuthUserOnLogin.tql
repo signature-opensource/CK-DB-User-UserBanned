@@ -7,7 +7,7 @@ begin
 
     declare @BanReason varchar(128);
     select @BanReason = KeyReason
-    from CK.fUserBannedAt( @LoginTimeNow )
+    from CK.fUserBannedViewAt( @LoginTimeNow )
     where UserId = @UserId;
 
     if @BanReason is not null
