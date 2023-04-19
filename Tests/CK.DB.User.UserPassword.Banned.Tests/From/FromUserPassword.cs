@@ -8,6 +8,7 @@ using static CK.Testing.DBSetupTestHelper;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Threading.Tasks;
 
 namespace CK.DB.User.UserPassword.Banned.Tests
 {
@@ -92,7 +93,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
         }
 
         [Test]
-        public void test_general_ban_flow()
+        public async Task test_general_ban_flow_Async()
         {
             var user = ObtainSqlPackage<UserTable>();
             var userPassword = ObtainSqlPackage<UserPasswordTable>();
@@ -135,7 +136,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
 
                     ban!.BanEndDate.Kind.Should().Be( DateTimeKind.Utc );
 
-                    while( DateTime.UtcNow < ban!.BanEndDate ) ;
+                    await Task.Delay( 2500 );
 
                     ban!.BanEndDate.Should().BeOnOrBefore( DateTime.UtcNow );
 
@@ -152,7 +153,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                     ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 4 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
-                    while( DateTime.UtcNow < ban!.BanEndDate ) ;
+                    await Task.Delay( 5500 );
 
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
                 }
@@ -165,7 +166,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                 ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 6 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                 userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
-                while( DateTime.UtcNow < ban!.BanEndDate ) ;
+                await Task.Delay( 7500 );
 
                 userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
             }
