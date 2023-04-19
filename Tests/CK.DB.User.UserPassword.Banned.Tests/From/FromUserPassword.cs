@@ -8,7 +8,6 @@ using static CK.Testing.DBSetupTestHelper;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Threading.Tasks;
 
 namespace CK.DB.User.UserPassword.Banned.Tests
 {
@@ -42,7 +41,6 @@ namespace CK.DB.User.UserPassword.Banned.Tests
         {
             var user = ObtainSqlPackage<UserTable>();
             var userPassword = ObtainSqlPackage<UserPasswordTable>();
-            var userBanned = ObtainSqlPackage<UserBannedTable>();
 
             using( SqlStandardCallContext ctx = new() )
             {
@@ -132,7 +130,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                     ban = userBanned.GetBannedUser( ctx, userId );
                     ban.Should().NotBeNull();
                     ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 2 ), precision: new TimeSpan( 0, 0, 0, 10 ) );
+                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 2 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
                     while( DateTime.UtcNow < ban!.BanEndDate ) ;
@@ -147,7 +145,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                     ban = userBanned.GetBannedUser( ctx, userId );
                     ban.Should().NotBeNull();
                     ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 4 ), precision: new TimeSpan( 0, 0, 0, 10 ) );
+                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 4 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
                     while( DateTime.UtcNow < ban!.BanEndDate ) ;
@@ -160,7 +158,7 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                 ban = userBanned.GetBannedUser(ctx, userId);
                 ban.Should().NotBeNull();
                 ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 6 ), precision: new TimeSpan( 0, 0, 0, 10 ) );
+                ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 6 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                 userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
                 while( DateTime.UtcNow < ban!.BanEndDate ) ;
@@ -173,14 +171,6 @@ namespace CK.DB.User.UserPassword.Banned.Tests
         {
             return TestHelper.StObjMap.StObjs.Obtain<T>()
                 ?? throw new NullReferenceException( $"Cannot obtain {typeof( T ).Name} table." );
-        }
-
-        /// <summary>
-        /// Reduce a pricision of a DateTime to 0,01 second, because the sql ban date works with datetim2(2).
-        /// </summary>
-        static DateTime ReducePrecision( DateTime dateTime )
-        {
-            return new DateTime( dateTime.Ticks - (dateTime.Ticks % (TimeSpan.TicksPerMillisecond * 10)), dateTime.Kind );
         }
     }
 }

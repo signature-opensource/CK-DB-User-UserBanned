@@ -13,9 +13,21 @@ namespace CK.DB.User.UserBanned.Tests
 
             public string KeyReason { get; set; } = string.Empty;
 
-            public DateTime BanStartDate { get; set; }
+            DateTime _banStartDate;
+            public DateTime BanStartDate
+            {
+                get => _banStartDate;
+                // Must specify kind because Dapper maps datetime2(2) in DateTime with DateTimeKind.Unspecified.
+                set => _banStartDate = DateTime.SpecifyKind( value, DateTimeKind.Utc );
+            }
 
-            public DateTime BanEndDate { get; set; }
+            DateTime _banEndDate;
+            public DateTime BanEndDate
+            {
+                get => _banEndDate;
+                // Must specify kind because Dapper maps datetime2(2) in DateTime with DateTimeKind.Unspecified.
+                set => _banEndDate = DateTime.SpecifyKind( value, DateTimeKind.Utc );
+            }
         }
 
         public static IEnumerable<UserBanned> GetCurrentlyBannedUser( this UserBannedTable @this, ISqlCallContext ctx, int userId )
