@@ -133,7 +133,11 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                     ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 2 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
 
+                    ban!.BanEndDate.Kind.Should().Be( DateTimeKind.Utc );
+
                     while( DateTime.UtcNow < ban!.BanEndDate ) ;
+
+                    ban!.BanEndDate.Should().BeOnOrBefore( DateTime.UtcNow );
 
                     userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
                 }
