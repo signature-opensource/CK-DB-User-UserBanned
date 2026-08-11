@@ -1,4 +1,4 @@
--- SetupConfig: {}
+-- SetupConfig: { "Requires": [ "CK.fUserBannedViewAt" ] }
 --
 create view CK.vUserCurrentlyBanned
 as

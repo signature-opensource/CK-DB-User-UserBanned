@@ -1,9 +1,8 @@
 using NUnit.Framework;
 
-namespace CK.DB.User.UserBanned.Tests
+namespace DBSetup;
+
+[TestFixture]
+public class DBSetup : CK.DB.Tests.DBSetup
 {
-    [TestFixture]
-    public class DBSetup : CK.DB.Tests.DBSetup
-    {
-    }
 }

@@ -49,3 +49,21 @@ The sql view `CK.vUserCurrentlyBanned` is based on the previous function and ret
 select UserId, KeyReason, UserName, BanStartDate, BanEndDate
 from CK.vUserCurrentlyBanned;
 ```
+
+## Test projects are not published
+
+Both test projects of this repository declare `<IsPackable>false</IsPackable>`:
+
+- `Tests/CK.DB.User.UserBanned.Tests`
+- `Tests/CK.DB.User.UserPassword.Banned.Tests`
+
+They used to be packable, following the `CK.DB.*.Tests` convention where a test package exposes reusable base
+fixtures that a downstream repository inherits from — the way this repository itself consumes `CK.DB.Auth.Tests`
+and `CK.DB.User.UserPassword.Tests`. Nothing consumes them that way today: the only reference to
+`CK.DB.User.UserBanned.Tests` is the `ProjectReference` from `CK.DB.User.UserPassword.Banned.Tests`, inside this
+repository. Publishing them would therefore mean maintaining a public surface with no consumer, so we stopped.
+
+If a downstream repository ever needs to inherit these fixtures (for instance to derive from `UserBannedTests` and
+set `AssumeNotSystemCanBan`, which exists precisely for that purpose), set `IsPackable` back to `true` in the
+relevant project. Nothing else is required — keep in mind that doing so turns the test classes into a published
+API, and renaming or reordering them then becomes a breaking change for the consumers.

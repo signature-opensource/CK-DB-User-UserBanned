@@ -4,8 +4,9 @@ using CK.DB.Auth;
 using CK.DB.User.UserBanned;
 using CK.DB.User.UserBanned.Tests;
 using CK.SqlServer;
-using static CK.Testing.DBSetupTestHelper;
-using FluentAssertions;
+using CK.Testing;
+using static CK.Testing.MonitorTestHelper;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
@@ -30,10 +31,10 @@ namespace CK.DB.User.UserPassword.Banned.Tests
 
                 LoginResult result = userPassword.LoginUser( ctx, userId, password );
 
-                result.IsSuccess.Should().BeTrue();
-                result.FailureCode.Should().Be( 0 );
-                userPassword.GetFailedAttemptCount( ctx, userId ).Should().Be( 0 );
-                userBanned.GetBannedUser( ctx, userId ).Should().BeNull();
+                result.IsSuccess.ShouldBeTrue();
+                result.FailureCode.ShouldBe( 0 );
+                userPassword.GetFailedAttemptCount( ctx, userId ).ShouldBe( 0 );
+                userBanned.GetBannedUser( ctx, userId ).ShouldBeNull();
             }
         }
 
@@ -54,16 +55,16 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                 for( attempt = 1; attempt <= 4; attempt++ )
                 {
                     result = userPassword.LoginUser( ctx, userId, "fail-password" );
-                    result.FailureCode.Should().NotBe( 6 );
-                    result.IsSuccess.Should().BeFalse();
-                    userPassword.GetFailedAttemptCount( ctx, userId ).Should().Be( attempt );
+                    result.FailureCode.ShouldNotBe( 6 );
+                    result.IsSuccess.ShouldBeFalse();
+                    userPassword.GetFailedAttemptCount( ctx, userId ).ShouldBe( attempt );
                 }
 
                 result = userPassword.LoginUser( ctx, userId, "fail-password" );
-                userPassword.GetFailedAttemptCount( ctx, userId ).Should().Be( 4 );
-                result.IsSuccess.Should().BeFalse();
-                result.FailureCode.Should().Be( 6 );
-                result.FailureReason.Should().Be( "UserPassword.TooManyAttempt" );
+                userPassword.GetFailedAttemptCount( ctx, userId ).ShouldBe( 4 );
+                result.IsSuccess.ShouldBeFalse();
+                result.FailureCode.ShouldBe( 6 );
+                result.FailureReason.ShouldBe( "UserPassword.TooManyAttempt" );
             }
         }
 
@@ -81,14 +82,14 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                 userPassword.CreateOrUpdatePasswordUser( ctx, 1, userId, password );
 
                 LoginResult result = userPassword.LoginUser( ctx, userId, "fail-password" );
-                result.IsSuccess.Should().BeFalse();
-                userPassword.GetFailedAttemptCount( ctx, userId).Should().Be( 1 );
-                userBanned.GetBannedUser( ctx, userId ).Should().BeNull();
+                result.IsSuccess.ShouldBeFalse();
+                userPassword.GetFailedAttemptCount( ctx, userId).ShouldBe( 1 );
+                userBanned.GetBannedUser( ctx, userId ).ShouldBeNull();
 
                 result = userPassword.LoginUser( ctx, userId, "fail-password" );
-                result.IsSuccess.Should().BeFalse();
-                userPassword.GetFailedAttemptCount( ctx, userId ).Should().Be( 2 );
-                userBanned.GetBannedUser( ctx, userId ).Should().BeNull();
+                result.IsSuccess.ShouldBeFalse();
+                userPassword.GetFailedAttemptCount( ctx, userId ).ShouldBe( 2 );
+                userBanned.GetBannedUser( ctx, userId ).ShouldBeNull();
             }
         }
 
@@ -119,62 +120,62 @@ namespace CK.DB.User.UserPassword.Banned.Tests
                 // FailedAttemptCount 1 to 3
                 for( attempt = 1; attempt <= 3; attempt++ )
                 {
-                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.Should().BeFalse();
-                    userPassword.GetFailedAttemptCount( ctx, userId ).Should().Be( attempt );
-                    userBanned.GetBannedUser( ctx, userId ).Should().BeNull();
+                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.ShouldBeFalse();
+                    userPassword.GetFailedAttemptCount( ctx, userId ).ShouldBe( attempt );
+                    userBanned.GetBannedUser( ctx, userId ).ShouldBeNull();
                 }
 
                 // FailedAttemptCount 4 to 5
                 for( ; attempt <= 5; attempt++ )
                 {
-                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.Should().BeFalse();
+                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.ShouldBeFalse();
                     ban = userBanned.GetBannedUser( ctx, userId );
-                    ban.Should().NotBeNull();
-                    ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 2 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
+                    ban.ShouldNotBeNull();
+                    ban!.KeyReason.ShouldBe( "UserPassword.TooManyAttempt" );
+                    ban!.BanEndDate.ShouldBe( ban!.BanStartDate.AddSeconds( 2 ), new TimeSpan( 0, 0, 0, 0, 10 ) );
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldNotBeNull();
 
-                    ban!.BanEndDate.Kind.Should().Be( DateTimeKind.Utc );
+                    ban!.BanEndDate.Kind.ShouldBe( DateTimeKind.Utc );
 
                     await Task.Delay( 2500 );
 
-                    ban!.BanEndDate.Should().BeOnOrBefore( DateTime.UtcNow );
+                    ban!.BanEndDate.ShouldBeLessThanOrEqualTo( DateTime.UtcNow );
 
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldBeNull();
                 }
 
                 // FailedAttemptCount 6 to 8
                 for( ; attempt <= 8; attempt++ )
                 {
-                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.Should().BeFalse();
+                    userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.ShouldBeFalse();
                     ban = userBanned.GetBannedUser( ctx, userId );
-                    ban.Should().NotBeNull();
-                    ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                    ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 4 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
+                    ban.ShouldNotBeNull();
+                    ban!.KeyReason.ShouldBe( "UserPassword.TooManyAttempt" );
+                    ban!.BanEndDate.ShouldBe( ban!.BanStartDate.AddSeconds( 4 ), new TimeSpan( 0, 0, 0, 0, 10 ) );
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldNotBeNull();
 
                     await Task.Delay( 5500 );
 
-                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
+                    userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldBeNull();
                 }
 
                 // FailedAttemptCount 9
-                userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.Should().BeFalse();
+                userPassword.LoginUser( ctx, userId, "fail-password" ).IsSuccess.ShouldBeFalse();
                 ban = userBanned.GetBannedUser(ctx, userId);
-                ban.Should().NotBeNull();
-                ban!.KeyReason.Should().Be( "UserPassword.TooManyAttempt" );
-                ban!.BanEndDate.Should().BeCloseTo( ban!.BanStartDate.AddSeconds( 6 ), precision: new TimeSpan( 0, 0, 0, 0, 10 ) );
-                userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().NotBeNull();
+                ban.ShouldNotBeNull();
+                ban!.KeyReason.ShouldBe( "UserPassword.TooManyAttempt" );
+                ban!.BanEndDate.ShouldBe( ban!.BanStartDate.AddSeconds( 6 ), new TimeSpan( 0, 0, 0, 0, 10 ) );
+                userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldNotBeNull();
 
                 await Task.Delay( 7500 );
 
-                userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).Should().BeNull();
+                userBanned.GetCurrentlyBannedUser( ctx, userId, "UserPassword.TooManyAttempt" ).ShouldBeNull();
             }
         }
 
         static T ObtainSqlPackage<T>() where T : SqlPackage
         {
-            return TestHelper.StObjMap.StObjs.Obtain<T>()
+            return SharedEngine.Map.StObjs.Obtain<T>()
                 ?? throw new NullReferenceException( $"Cannot obtain {typeof( T ).Name} table." );
         }
     }

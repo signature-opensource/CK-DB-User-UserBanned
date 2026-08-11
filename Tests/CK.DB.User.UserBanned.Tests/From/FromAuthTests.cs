@@ -1,11 +1,12 @@
 using CK.Core;
 using CK.DB.Actor;
+using CK.DB.Auth;
 using CK.SqlServer;
-using static CK.Testing.DBSetupTestHelper;
+using CK.Testing;
+using Shouldly;
 using NUnit.Framework;
 using System;
-using CK.DB.Auth;
-using FluentAssertions;
+using static CK.Testing.MonitorTestHelper;
 
 namespace CK.DB.User.UserBanned.Tests
 {
@@ -24,10 +25,10 @@ namespace CK.DB.User.UserBanned.Tests
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
-                result.UserId.Should().Be( userId );
-                result.IsSuccess.Should().BeTrue();
-                result.FailureCode.Should().Be( 0 );
-                result.FailureReason.Should().BeNullOrEmpty();
+                result.UserId.ShouldBe( userId );
+                result.IsSuccess.ShouldBeTrue();
+                result.FailureCode.ShouldBe( 0 );
+                result.FailureReason.ShouldBeNullOrEmpty();
             }
         }
 
@@ -46,10 +47,10 @@ namespace CK.DB.User.UserBanned.Tests
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
-                result.UserId.Should().Be( userId );
-                result.IsSuccess.Should().BeTrue();
-                result.FailureCode.Should().Be( 0 );
-                result.FailureReason.Should().BeNullOrEmpty();
+                result.UserId.ShouldBe( userId );
+                result.IsSuccess.ShouldBeTrue();
+                result.FailureCode.ShouldBe( 0 );
+                result.FailureReason.ShouldBeNullOrEmpty();
             }
         }
 
@@ -68,10 +69,10 @@ namespace CK.DB.User.UserBanned.Tests
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
-                result.UserId.Should().Be( userId );
-                result.IsSuccess.Should().BeTrue();
-                result.FailureCode.Should().Be( 0 );
-                result.FailureReason.Should().BeNullOrEmpty();
+                result.UserId.ShouldBe( userId );
+                result.IsSuccess.ShouldBeTrue();
+                result.FailureCode.ShouldBe( 0 );
+                result.FailureReason.ShouldBeNullOrEmpty();
             }
         }
 
@@ -91,9 +92,9 @@ namespace CK.DB.User.UserBanned.Tests
 
                 LoginResult result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
-                result.FailureCode.Should().Be( 6 );
-                result.FailureReason.Should().Be( keyReason );
-                result.IsSuccess.Should().BeFalse();
+                result.FailureCode.ShouldBe( 6 );
+                result.FailureReason.ShouldBe( keyReason );
+                result.IsSuccess.ShouldBeFalse();
             }
         }
 
@@ -124,21 +125,21 @@ namespace CK.DB.User.UserBanned.Tests
                 {
                     result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, now );
 
-                    result.FailureCode.Should().Be( 6 );
-                    result.FailureReason.Should().Be( keyReason );
-                    result.IsSuccess.Should().BeFalse();
+                    result.FailureCode.ShouldBe( 6 );
+                    result.FailureReason.ShouldBe( keyReason );
+                    result.IsSuccess.ShouldBeFalse();
                 }
 
                 result = auth.OnUserLogin( ctx, "", Util.UtcMinValue, userId, actualLogin: false, DateTime.UtcNow );
 
-                result.FailureCode.Should().Be( 0 );
-                result.IsSuccess.Should().BeTrue();
+                result.FailureCode.ShouldBe( 0 );
+                result.IsSuccess.ShouldBeTrue();
             }
         }
 
         static T ObtainSqlPackage<T>() where T : SqlPackage
         {
-            return TestHelper.StObjMap.StObjs.Obtain<T>()
+            return SharedEngine.Map.StObjs.Obtain<T>()
                 ?? throw new NullReferenceException( $"Cannot obtain {typeof( T ).Name} table." );
         }
     }
