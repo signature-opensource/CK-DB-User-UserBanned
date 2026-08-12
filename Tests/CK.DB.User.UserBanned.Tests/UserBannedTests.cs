@@ -135,7 +135,7 @@ namespace CK.DB.User.UserBanned.Tests
 
                 Util.Invokable( () => userBanned.SetUserBanned( ctx, userId, "auto-ban", userId ) )
                     .ShouldThrow<Exception>()
-                    .InnerException!.Message.ShouldMatch( @"^ck:CK\.sUserBannedSet-\{.*\}-\[Security\.SystemLevelOnly\]" );
+                    .InnerException!.Message.ShouldMatch( @"^ck:CK\.sUserBannedSet-\{.*\}-\[Security\.AdminOnly\]" );
             }
         }
 
@@ -155,7 +155,7 @@ namespace CK.DB.User.UserBanned.Tests
 
                 Util.Invokable( () => userBanned.DestroyUserBanned( ctx, userId, "test", userId ) )
                     .ShouldThrow<Exception>()
-                    .InnerException!.Message.ShouldMatch( @"^ck:CK\.sUserBannedDestroy-\{.*\}-\[Security\.SystemLevelOnly\]" );
+                    .InnerException!.Message.ShouldMatch( @"^ck:CK\.sUserBannedDestroy-\{.*\}-\[Security\.AdminOnly\]" );
             }
         }
 
