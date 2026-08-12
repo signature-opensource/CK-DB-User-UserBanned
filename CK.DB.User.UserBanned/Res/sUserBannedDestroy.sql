@@ -17,7 +17,7 @@ begin
 
     -- Extension point: a consuming package can transform this procedure to inject SQL here
     -- that adjusts @CanContinue (to re-open or to harden the access) before the final check.
-    --<BannedSecurityCheck revert />
+    --<DestroySecurityCheck revert />
 
     if @CanContinue = 0 throw 50000, 'Security.AdminOnly', 1;
 
