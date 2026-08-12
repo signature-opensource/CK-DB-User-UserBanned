@@ -16,4 +16,8 @@
   <ItemGroup>
     <PackageReference Include="CK.DB.Auth" Version="28.0.3--ci.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CK.IO.User.UserBanned\CK.IO.User.UserBanned.csproj" />
+  </ItemGroup>
 </Project>

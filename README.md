@@ -40,6 +40,16 @@ public abstract void SetUserBanned( ISqlCallContext ctx, int actorId, string key
 public abstract void DestroyUserBanned( ISqlCallContext ctx, int actorId, string keyReason, int userId );
 ```
 
+## Cris commands
+
+The `CK.IO.User.UserBanned` package exposes the same two operations as Cris commands, so that banning
+can be driven from an endpoint: `ISetUserBannedCommand` (`UserId`, `KeyReason`, optional `BanStartDate`
+and `BanEndDate`) and `IDestroyUserBannedCommand` (`UserId`, `KeyReason`). Both are
+`ICommandAuthNormal` (the acting `ActorId` is the one checked by the stored procedures) and return an
+`ICrisBasicCommandResult`. Their handlers live in `CK.DB.User.UserBanned/Package.CommandHandlers.cs`:
+a security or SQL failure is not propagated but reported as a user message, so `Success` is `false`
+and nothing is written.
+
 This `CK.DB.User.UserBanned.Package` injects code into `CK.sAuthUserOnLogin` procedure (from the CK.DB.Auth package). To check the user is not currently banned.
 
 The sql function `CK.fUserBannedViewAt` returns the effective banishments of the CK.tUserBanned table on the selected date.

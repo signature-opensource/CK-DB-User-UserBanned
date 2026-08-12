@@ -16,4 +16,5 @@
   </Folder>
   <Project Path="CK.DB.User.UserBanned/CK.DB.User.UserBanned.csproj" />
   <Project Path="CK.DB.User.UserPassword.Banned/CK.DB.User.UserPassword.Banned.csproj" />
+  <Project Path="CK.IO.User.UserBanned/CK.IO.User.UserBanned.csproj" />
 </Solution>
