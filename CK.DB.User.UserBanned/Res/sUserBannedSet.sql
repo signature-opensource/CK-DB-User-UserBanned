@@ -17,10 +17,15 @@ begin
     if exists( select 1 from CK.tActorProfile where GroupId = 1 and ActorId = @UserId )
         throw 50000, 'Security.CannotBanSystemGroupMember', 1;
     
-    -- Preconditions
+    declare @CanContinue bit = 0;
+    if exists( select 1 from CK.tActorProfile where GroupId = 1 and ActorId = @ActorId )
+        set @CanContinue = 1;
 
-    if not exists( select 1 from CK.tActorProfile where GroupId = 1 and ActorId = @ActorId )
-        throw 50000, 'Security.SystemLevelOnly', 1;
+    -- Extension point: a consuming package can transform this procedure to inject SQL here
+    -- that adjusts @CanContinue (to re-open or to harden the access) before the final check.
+    --<BannedSecurityCheck revert />
+
+    if @CanContinue = 0 throw 50000, 'Security.AdminOnly', 1;
         
     -- Action
 
