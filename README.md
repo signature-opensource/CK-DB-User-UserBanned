@@ -1,64 +1,13 @@
 # CK-DB-User-UserBanned
 
-This package is based on **CK.DB.Auth** that introduces User and authentication.
+Adds user banishment to **CK.DB.Auth**: a user present in the UserBanned table has been banned, and
+the authentication procedure itself refuses to log them in.
 
-It adds UserBanned to the picture: a user present in the UserBanned table has been banned.
-
-The relational model of this package is as follows:
-
-![Database model](Doc/database_model.png)
-
-The table tUserBanned accepts many bans for one user, with differents reasons. The unicity of a banishment is based on the couple (UserId, Reason).
-
-A user banishment can be set and destroy thanks to the `UserBannedTable` methods:
-
-```csharp
-/// <summary>
-/// Creates or updates a user banishment between the specified dates.
-/// <para>
-/// If <paramref name="banStartDate"/> is <see langword="null"/> and the user is already ban then the start date will be the same, else it will be utc now.
-/// </para>
-/// If <paramref name="banEndDate"/> is <see langword="null"/> it will be eternal (9999-12-31).
-/// </summary>
-/// <param name="ctx">The call context.</param>
-/// <param name="actorId">The identifier of the actor who bans the user.</param>
-/// <param name="keyReason">The reason of the banishment.</param>
-/// <param name="userId">The identifier of the user to ban.</param>
-/// <param name="banStartDate">The start date of the banishment, default is utc now.</param>
-/// <param name="banEndDate">The end date of the banishment, default is eternal.</param>
-[SqlProcedure( "sUserBannedSet" )]
-public abstract void SetUserBanned( ISqlCallContext ctx, int actorId, string keyReason, int userId, DateTime? banStartDate = null, DateTime? banEndDate = null );
-
-/// <summary>
-/// Destroys the user banishment.
-/// </summary>
-/// <param name="ctx">The call context.</param>
-/// <param name="actorId">The identifier of the actor who destroy the banishment.</param>
-/// <param name="keyReason">The reason of the banishment.</param>
-/// <param name="userId">The identifier of the user to unbanned.</param>
-[SqlProcedure( "sUserBannedDestroy" )]
-public abstract void DestroyUserBanned( ISqlCallContext ctx, int actorId, string keyReason, int userId );
-```
-
-## Cris commands
-
-The `CK.IO.User.UserBanned` package exposes the same two operations as Cris commands, so that banning
-can be driven from an endpoint: `ISetUserBannedCommand` (`UserId`, `KeyReason`, optional `BanStartDate`
-and `BanEndDate`) and `IDestroyUserBannedCommand` (`UserId`, `KeyReason`). Both are
-`ICommandAuthNormal` (the acting `ActorId` is the one checked by the stored procedures) and return an
-`ICrisBasicCommandResult`. Their handlers live in `CK.DB.User.UserBanned/Package.CommandHandlers.cs`:
-a security or SQL failure is not propagated but reported as a user message, so `Success` is `false`
-and nothing is written.
-
-This `CK.DB.User.UserBanned.Package` injects code into `CK.sAuthUserOnLogin` procedure (from the CK.DB.Auth package). To check the user is not currently banned.
-
-The sql function `CK.fUserBannedViewAt` returns the effective banishments of the CK.tUserBanned table on the selected date.
-
-The sql view `CK.vUserCurrentlyBanned` is based on the previous function and returns the following values for the banned users at the execution:
-```sql
-select UserId, KeyReason, UserName, BanStartDate, BanEndDate
-from CK.vUserCurrentlyBanned;
-```
+| Package | Description |
+|---------|-------------|
+| [CK.DB.User.UserBanned](CK.DB.User.UserBanned/README.md) | The `CK.tUserBanned` table, the date-based function and view, the set/destroy procedures, and the transformations of `CK.sAuthUserOnLogin` and `CK.sUserDestroy`. |
+| [CK.IO.User.UserBanned](CK.IO.User.UserBanned/README.md) | The Cris command contract - `ISetUserBannedCommand` and `IDestroyUserBannedCommand` - with no dependency on the database layer. |
+| [CK.DB.User.UserPassword.Banned](CK.DB.User.UserPassword.Banned/README.md) | Automatic banishment after repeated basic-authentication failures. |
 
 ## Test projects are not published
 
