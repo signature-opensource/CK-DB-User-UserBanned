@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CK.DB.Auth" Version="28.0.3--ci.1" />
+    <PackageReference Include="CK.DB.Auth" Version="28.0.3" />
   </ItemGroup>
 
   <ItemGroup>
