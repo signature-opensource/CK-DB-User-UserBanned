@@ -15,13 +15,13 @@ erDiagram
     CK_tUserBanned {
         int UserId PK "also FK to CK.tUser"
         varchar_128 KeyReason PK "BIN2: case and accent sensitive"
-        datetime2 BanStartDate "defaults to utc now"
-        datetime2 BanEndDate "defaults to 9999-12-31 (eternal)"
+        datetime2_2 BanStartDate "not null; sUserBannedSet substitutes utc now for null"
+        datetime2_2 BanEndDate "not null; sUserBannedSet substitutes 9999-12-31 for null"
     }
     CK_tUser ||--o{ CK_tUserBanned : "FK_CK_UserBanned_UserId"
 ```
 
-`CK.tUser` belongs to [CK.DB.Actor](https://github.com/signature-opensource/CK-DB/tree/develop/CK.DB.Actor#readme)
+`CK.tUser` comes with the `CK.DB.Auth` reference below, which brings [CK.DB.Actor](https://github.com/signature-opensource/CK-DB/tree/develop/CK.DB.Actor#readme) transitively
 and is shown here only as the target of the foreign key and as the source of `UserName` for the view
 below.
 
@@ -36,7 +36,9 @@ byte**, so `"TooManyAttempt"` and `"toomanyattempt"` are two distinct banishment
 
 ## A ban is an interval, and "currently banned" is computed, never stored.
 
-There is no `IsBanned` flag. Whether a user is banned is always evaluated against a date, and the two
+There is no `IsBanned` **column**: whether a user is banned is always evaluated against a date. The
+`IsBanned` boolean of `CK.IO.User.UserBanned.IUserProfile` - a package this one references - is a
+projection of exactly that evaluation, not stored state. Whether a user is banned is always evaluated against a date, and the two
 SQL objects that do it are the only supported way to read the table:
 
 - [`CK.fUserBannedViewAt( @Date )`](Res/fUserBannedViewAt.sql) is an inline table-valued function
@@ -145,6 +147,38 @@ security hooks, each procedure carries its own action markers - and only its own
 Because `sUserBannedSet` is an upsert, it has two pairs rather than one: a transformation that must run
 for every ban has to inject into both the create and the update branch.
 
+## What makes a ban effective on an already opened session.
+
+The SQL above refuses a *login*. It does nothing about a token obtained before the ban, which stays
+valid until it expires - and that gap is closed in C#, by
+[`BannedActorValidator`](BannedActorValidator.cs), a `[CommandHandlingValidator]` on
+`ICommandAuthNormal`. Its own summary is the clearest statement of the whole feature's shape:
+
+> This is the mechanism that actually makes a banishment effective on an already opened session: the
+> login is refused by `CK.sAuthUserOnLogin`, but a token obtained before the ban stays valid until it
+> expires. The actor channel push and the navigation guard are only there to eject the user quickly and
+> politely; this validator is what guarantees that a banished user cannot do anything, whatever the
+> client does or fails to do.
+
+It is active on reference - an `IAutoService`, nothing to register - and refuses with
+`collector.Error( "Your account has been disabled.", "UserBanned.ActorBanned" )` after logging the
+actor and the command name.
+
+Two decisions inside it are worth knowing:
+
+- **One command is exempt**, and deliberately: `if( cmd is IGetUserProfileQCommand ) return;`. The
+  client learns it is banished by reading `IsBanned` on its own profile, so refusing that read would
+  leave the navigation guard blind and turn the flag into dead code. It is read-only, about the caller
+  itself, and the caller is being logged out anyway.
+- **Anonymous actors are not its business**: `actorId <= 0` returns, because commands that require an
+  actor are rejected upstream.
+
+The cost is one SQL round trip per authenticated command, over
+`CK.fUserBannedViewAt( sysutcdatetime() )`. The remark in the source states the trade: negligible for a
+back office, and if it ever weighs, *"the remedy is a short-lived per-actor cache in the request scope,
+not a narrower set of guarded commands."*
+
+
 ## How this package transforms other packages.
 
 ```csharp
@@ -152,7 +186,40 @@ for every ban has to inject into both the create and the update branch.
 [Versions( "1.0.0" )]
 [SqlObjectItem( "transform:CK.sUserDestroy, transform:CK.sAuthUserOnLogin" )]
 public abstract partial class Package : SqlPackage
+{
+    // void StObjConstruct( CK.DB.Auth.Package auth ) - the actual expression of "based on CK.DB.Auth".
+    // [InjectObject] public UserBannedTable UserBannedTable { get; private set; }
+}
 ```
+
+Here is one, in full - `Res/sUserDestroy.tql`, nine lines:
+
+```sql
+-- SetupConfig: { }
+--
+create transformer on CK.sUserDestroy
+as
+begin
+    inject "
+        delete from CK.tUserBanned where UserId = @UserId;
+    " into "PreDestroy";
+end
+```
+
+Four conventions the file obeys, and a consumer of *this* package writes the same shape against the
+markers tabulated above:
+
+- **The file is named after its target**, not after this package: `sUserDestroy.tql` transforms
+  `CK.sUserDestroy`. Likewise `sAuthUserOnLogin.tql`.
+- **`-- SetupConfig: { }` is recommended, not required.** Its absence only draws a warning -
+  *"Missing SetupConfig:{}. At least an empty one should appear in the header."* - and the sibling
+  `sAuthUserOnLogin.tql` in this very folder carries none while being a live item. What makes a file a
+  setup item is its entry in the `[SqlObjectItem]` above.
+- **The declaration and the file must agree.** `transform:CK.sUserDestroy` in the `[SqlObjectItem]`
+  above is what pulls this file in; adding a `.tql` without listing it there does nothing.
+- **`into "PreDestroy"` names a marker in the target procedure**, which the target package published
+  for exactly this purpose. That is the same contract, seen from the other side: this package injects
+  into someone else's markers and publishes its own.
 
 - [`sAuthUserOnLogin.tql`](Res/sAuthUserOnLogin.tql) injects a check into `CK.sAuthUserOnLogin` (from
   the CK.DB.Auth package) so that **a currently banned user cannot log in**. The reason is surfaced as
