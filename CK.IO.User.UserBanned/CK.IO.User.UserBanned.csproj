@@ -6,6 +6,6 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.IO.Actor" Version="0.44.0--ci.2" />
+    <PackageReference Include="CK.IO.Actor" Version="0.44.0--ci.3" />
   </ItemGroup>
 </Project>
