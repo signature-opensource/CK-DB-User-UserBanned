@@ -299,7 +299,9 @@ namespace CK.DB.User.UserBanned.Tests
             {
                 int userId = user.CreateUser( ctx, 1, Guid.NewGuid().ToString() );
 
-                DateTime banStartDate = DateTime.UtcNow;
+                // Starts the ban slightly in the past: BanStartDate is a datetime2(2) (that may be rounded up)
+                // and vUserCurrentlyBanned compares it to the server's sysutcdatetime().
+                DateTime banStartDate = DateTime.UtcNow.AddSeconds( -1 );
                 TimeSpan duration = TimeSpan.FromDays( 1 );
                 string keyReason = "test";
 
