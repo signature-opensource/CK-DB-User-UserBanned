@@ -5,10 +5,13 @@ namespace CK.IO.User.UserBanned;
 
 /// <summary>
 /// Creates or updates the banishment of a user for a given <see cref="KeyReason"/>.
-/// The acting <see cref="ICommandAuthNormal.ActorId"/> must be allowed to ban (by default a member
-/// of the System group, enforced by CK.sUserBannedSet).
+/// The acting actor must be allowed to ban (by default a member of the System group, enforced by CK.sUserBannedSet).
+/// <para>
+/// This is administration, a high-value action: it requires the <see cref="ICommandAuthCritical">Critical</see> level
+/// (a recent login), never reachable by a calling party alone.
+/// </para>
 /// </summary>
-public interface ISetUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthNormal
+public interface ISetUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthCritical
 {
     /// <summary>
     /// Gets or sets the identifier of the user to ban.
