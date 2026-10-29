@@ -6,25 +6,30 @@ agent) can depend on the contract without dragging the database layer in.
 
 ## The two commands.
 
-Both are `ICommand<ICrisBasicCommandResult>` and `ICommandAuthNormal`. Two guarantees come with that,
+Both are `ICommand<ICrisBasicCommandResult>` and `ICommandAuthCritical`. Two guarantees come with that,
 and they are worth separating:
 
-- from `ICommandAuthUnsafe`, which it extends: **the acting `ActorId` is the current
-  `IAuthenticationInfo.UnsafeUser`** - it comes from the authentication, not from the payload, and it is
-  the one the stored procedures check;
-- from `ICommandAuthNormal` itself: **the authentication level must be `Normal` or `Critical`**. A
-  remembered-but-unsafe session is refused before the handler runs.
+- from `ICommandAuthUnsafe`, which it extends: **the acting `ActorId` is the current actor** - it comes
+  from the authentication, not from the payload, and it is the one the stored procedures check;
+- from `ICommandAuthCritical` itself: **the authentication level must be `Critical`** (a recent login).
+  A `Normal` session, an unsafe one, or a party that calls on behalf of the user (it never reaches
+  `Critical` alone) is refused before the handler runs.
 
-The second one is the whole difference with `ICommandAuthUnsafe`, and it is what stops a stale session
-from banning anybody.
+Banning is administration, a high-value action: a session that is not recent must not be able to ban
+anybody. A user interface must expect the refusal and offer to log in again. With WebFrontAuth
+(CK.AspNet.Auth), a login reaches `Critical` only for the schemes listed in
+`WebFrontAuthOptions.SchemesCriticalTimeSpan`: without it, these commands are always refused.
 
 ```csharp
 /// <summary>
 /// Creates or updates the banishment of a user for a given <see cref="KeyReason"/>.
-/// The acting <see cref="ICommandAuthNormal.ActorId"/> must be allowed to ban (by default a member
-/// of the System group, enforced by CK.sUserBannedSet).
+/// The acting actor must be allowed to ban (by default a member of the System group, enforced by CK.sUserBannedSet).
+/// <para>
+/// This is administration, a high-value action: it requires the <see cref="ICommandAuthCritical">Critical</see> level
+/// (a recent login), never reachable by a calling party alone.
+/// </para>
 /// </summary>
-public interface ISetUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthNormal
+public interface ISetUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthCritical
 {
     /// ... (member summary elided)
     int UserId { get; set; }
@@ -51,10 +56,13 @@ public interface ISetUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICom
 ```csharp
 /// <summary>
 /// Destroys the banishment of a user for a given <see cref="KeyReason"/>.
-/// The acting <see cref="ICommandAuthNormal.ActorId"/> must be allowed to unban (by default a member
-/// of the System group, enforced by CK.sUserBannedDestroy).
+/// The acting actor must be allowed to unban (by default a member of the System group, enforced by CK.sUserBannedDestroy).
+/// <para>
+/// This is administration, a high-value action: it requires the <see cref="ICommandAuthCritical">Critical</see> level
+/// (a recent login), never reachable by a calling party alone.
+/// </para>
 /// </summary>
-public interface IDestroyUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthNormal
+public interface IDestroyUserBannedCommand : ICommand<ICrisBasicCommandResult>, ICommandAuthCritical
 {
     int UserId { get; set; }
     string KeyReason { get; set; }
