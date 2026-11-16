@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CK.DB.Auth" Version="31.0.0-0.uc.0.ci.79" />
-    <PackageReference Include="CK.SqlServer.Dapper" Version="18.0.0-0.uc.0.ci.42" />
+    <PackageReference Include="CK.DB.Auth" Version="31.0.0-0.uc.0.ci.80" />
+    <PackageReference Include="CK.SqlServer.Dapper" Version="18.0.0-0.uc.0.ci.43" />
   </ItemGroup>
 
   <ItemGroup>
